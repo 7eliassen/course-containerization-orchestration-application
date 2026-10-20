@@ -1,0 +1,10 @@
+.env
+k8s/app-secret.yaml
+__pycache__/
+*.pyc
+venv/
+.venv/
+.idea/
+.vscode/
+*.log
+.DS_Store
