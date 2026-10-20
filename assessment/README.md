@@ -20,8 +20,8 @@
 | [ЛР №2. Docker: образы](../labs/lab2-docker-image/README.md) | 5 | 10 |
 | [ЛР №3. Персистентность и изоляция](../labs/lab3-persistence/README.md) | 5 | 10 |
 | [ЛР №4. Docker Compose](../labs/lab4-compose/README.md) | 7,5 | 15 |
-| [ЛР №5. Знакомство с Kubernetes](../labs/lab5-kubernetes/README.md) | 10 | 20 |
-| [ЛР №6. Kubernetes: CI/CD](../labs/lab6-k8s-cicd/README.md) | 5 | 10 (на каждого) |
+| [ЛР №5. Знакомство с Kubernetes](../labs/lab5-kubernetes/README.md) | 7,5 | 15 |
+| [ЛР №6. Kubernetes: CI/CD](../labs/lab6-k8s-cicd/README.md) | 7,5 | 15 |
 | **Итого** | **35** | **70** |
 
 Если работа загружена после дедлайна, штраф — минус 2 балла за защиту после дедлайна.
