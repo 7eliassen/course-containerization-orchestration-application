@@ -409,6 +409,8 @@ kubectl get deployment <фамилия>-app -o jsonpath='{.spec.template.spec.co
 
 ## Формат сдачи
 
+PDF и исходники LaTeX разместите в `solutions/reports/lab-6/`, код приложения в `solutions/assist-py/`, ветка `lab-6`. Используйте обязательный [комплект оформления](../materials/report-format.md); на платформе разместите ссылки на ветку, PDF и запуск CI.
+
 Файл: ЛР6_Фамилия_ИО_ИСУ.pdf (например, ЛР6_Иванов_ИА_408145.pdf).
 
 Обязательные разделы:

@@ -19,3 +19,13 @@ venv/
 # MkDocs: generated sources and built site
 .site-src/
 site/
+
+# LaTeX: keep PDF and sources, ignore only build intermediates
+*.aux
+*.toc
+*.out
+*.fls
+*.fdb_latexmk
+*.xdv
+*.synctex.gz
+/materials/report-latex/*.pdf

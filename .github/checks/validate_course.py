@@ -14,7 +14,7 @@ import yaml
 
 
 SECTIONS = ("syllabus", "labs", "lectures", "assessment", "materials")
-STUDENT_EXTRAS = ("solutions/README.md", "solutions/_template/README.md")
+STUDENT_EXTRAS = ("solutions/README.md",)
 
 
 def student_pages(root: Path) -> list[Path]:
@@ -69,6 +69,15 @@ def validate(root: Path, staged: bool = False) -> list[str]:
             continue
         if re.search(r"\bTODO\b|\bFIXME\b", body):
             errors.append(f"{relative}: unfinished author placeholder")
+        obsolete = (
+            r"репозиторий не (?:нужен|требуется)",
+            r"для ЛР №1 нужен только PDF",
+            r"PDF, без репозитория",
+            r"загрузите.*(?:учебн\w* диск|диск\w* отч[её]т)",
+            r"PDF загружается.*диск",
+        )
+        if any(re.search(pattern, body, re.I) for pattern in obsolete):
+            errors.append(f"{relative}: obsolete first-lab or shared-drive submission policy")
         links = Links()
         links.feed(markdown.markdown(body, extensions=["fenced_code", "tables", "toc"]))
         for href in links.targets:
@@ -78,6 +87,19 @@ def validate(root: Path, staged: bool = False) -> list[str]:
             target = (path.parent / unquote(url.path)).resolve()
             if not target.is_relative_to(root) or not target.exists():
                 errors.append(f"{relative}: missing local link {href}")
+
+    first_lab = (root / "labs/01-docker.md").read_text(encoding="utf-8")
+    if "solutions/reports/lab-1/" not in first_lab or "исходники LaTeX" not in first_lab:
+        errors.append("lab-1: repository PDF and LaTeX sources must be required")
+    report_root = root / "materials/report-latex"
+    expected = {"main.tex", "Paper.tex", "gost.sty"}
+    actual = {p.name for p in report_root.iterdir()} if report_root.is_dir() else set()
+    if actual != expected:
+        errors.append(f"LaTeX template: expected only three source files, got {sorted(actual)}")
+    if expected <= actual:
+        main = (report_root / "main.tex").read_text(encoding="utf-8")
+        if r"\input{Paper}" not in main or r"\usepackage{gost}" not in main:
+            errors.append("LaTeX template: main.tex must load Paper.tex and gost.sty")
 
     lab_files = sorted((root / "labs").glob("[0-9][0-9]-*.md"))
     lab_numbers: list[int] = []
@@ -199,7 +221,8 @@ def main() -> int:
         print(f"ERROR: {error}")
     if errors:
         return 1
-    print("Course checks passed: links, metadata, scores, navigation" + (", publication boundaries." if args.staged else "."))
+    print("Course checks passed: links, metadata, scores, navigation, minimal LaTeX template, submission policy"
+          + (", publication boundaries." if args.staged else "."))
     return 0
 
 

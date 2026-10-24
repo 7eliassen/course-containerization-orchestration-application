@@ -65,12 +65,13 @@ jobs:
                       ignore=shutil.ignore_patterns(
                           ".*", "00-template.md",
                           "__pycache__", ".venv", "venv", "node_modules",
+                          "*.aux", "*.toc", "*.out", "*.log", "*.fls",
+                          "*.fdb_latexmk", "*.xdv", "*.synctex.gz", "main.pdf",
                       ),
                   )
 
           for relative in (
               "solutions/README.md",
-              "solutions/_template/README.md",
           ):
               source = root / relative
               if source.is_file():

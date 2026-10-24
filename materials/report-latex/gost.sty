@@ -1,0 +1,142 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{gost}[2026/10/25 Laboratory report formatting based on GOST 7.32-2017]
+% Standard record: https://protect.gost.ru/gost/details/7d280e43-7036-4a69-8e6e-d15867028343
+% Formatting clauses: https://typst-gost.ru/docs/advanced_usage/customization
+
+\RequirePackage{iftex}
+\ifPDFTeX
+  \RequirePackage{cmap}
+  \RequirePackage[utf8]{inputenc}
+  \RequirePackage[T2A]{fontenc}
+\else
+  \PackageError{gost}{Use pdfLaTeX}{Select pdfLaTeX in your editor.}
+\fi
+\RequirePackage[english,russian]{babel}
+\RequirePackage[
+  a4paper,left=30mm,right=15mm,top=20mm,bottom=20mm,
+  headheight=0pt,headsep=0pt,footskip=12mm
+]{geometry}
+\makeatletter
+\renewcommand{\normalsize}{\@setfontsize\normalsize{14pt}{17pt}}
+\makeatother
+\normalsize
+\RequirePackage{setspace}
+\onehalfspacing
+\RequirePackage{indentfirst}
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0pt}
+\clubpenalty=10000
+\widowpenalty=10000
+\emergencystretch=2em
+
+\RequirePackage{graphicx}
+\RequirePackage{float}
+\RequirePackage{array,tabularx,longtable}
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{caption}
+\DeclareCaptionLabelSeparator{gost}{~\textemdash~}
+\captionsetup{labelsep=gost,font=normalsize}
+\captionsetup[figure]{name=Рисунок,justification=centering}
+\captionsetup[table]{name=Таблица,position=top,justification=raggedright,singlelinecheck=false}
+
+\RequirePackage{titlesec}
+\titleformat{\chapter}[block]
+  {\normalfont\normalsize\bfseries}{\thechapter}{0.75em}{}
+\titleformat{\section}[block]
+  {\normalfont\normalsize\bfseries}{\thesection}{0.75em}{}
+\titleformat{\subsection}[block]
+  {\normalfont\normalsize\bfseries}{\thesubsection}{0.75em}{}
+\titlespacing*{\chapter}{\parindent}{0pt}{\baselineskip}
+\titlespacing*{\section}{\parindent}{\baselineskip}{0.5\baselineskip}
+\titlespacing*{\subsection}{\parindent}{\baselineskip}{0.5\baselineskip}
+\RequirePackage{tocloft}
+\renewcommand{\cfttoctitlefont}{\hfill\normalsize\bfseries}
+\renewcommand{\cftaftertoctitle}{\hfill}
+\setlength{\cftbeforetoctitleskip}{0pt}
+\setlength{\cftaftertoctitleskip}{\baselineskip}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+\setcounter{tocdepth}{1}
+\addto\captionsrussian{
+  \renewcommand{\contentsname}{СОДЕРЖАНИЕ}
+  \renewcommand{\bibname}{СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}
+}
+
+\RequirePackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+\RequirePackage{enumitem}
+\setlist[itemize]{label=\textendash,leftmargin=\parindent,itemsep=0pt,topsep=0.3\baselineskip}
+\setlist[enumerate]{leftmargin=\parindent,itemsep=0pt,topsep=0.3\baselineskip}
+\RequirePackage{fvextra}
+\DefineVerbatimEnvironment{code}{Verbatim}{
+  fontsize=\small,breaklines=true,breakanywhere=true,
+  frame=single,numbers=left,numbersep=6pt,xleftmargin=1.25cm,tabsize=2
+}
+\renewcommand{\theFancyVerbLine}{\fontsize{12pt}{14pt}\selectfont\arabic{FancyVerbLine}}
+\RequirePackage[hidelinks,unicode,breaklinks]{hyperref}
+\RequirePackage{xurl}
+\urlstyle{same}
+
+\counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+\counterwithout{equation}{chapter}
+\newcommand{\reportelement}[1]{
+  \clearpage\phantomsection
+  \addcontentsline{toc}{chapter}{\MakeUppercase{#1}}
+  \begin{center}\bfseries\MakeUppercase{#1}\end{center}
+  \vspace{0.5\baselineskip}
+}
+\makeatletter
+\renewcommand{\@biblabel}[1]{#1.}
+\renewenvironment{thebibliography}[1]{
+  \reportelement{Список использованных источников}
+  \list{\@biblabel{\@arabic\c@enumiv}}{
+    \settowidth\labelwidth{\@biblabel{#1}}
+    \leftmargin\labelwidth
+    \advance\leftmargin\labelsep
+    \usecounter{enumiv}
+    \let\p@enumiv\@empty
+    \renewcommand{\theenumiv}{\@arabic\c@enumiv}
+  }
+}{\endlist}
+\makeatother
+\newcommand{\reportscreenshot}[3]{
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{#1}{
+      \includegraphics[width=0.95\linewidth,height=0.55\textheight,keepaspectratio]{#1}
+    }{
+      \fbox{\parbox[c][35mm][c]{0.9\linewidth}{
+        \centering Вставьте собственный скриншот\\
+        \texttt{\detokenize{#1}}\\
+        Эта рамка не является результатом выполнения работы.
+      }}
+    }
+    \caption{#2}\label{#3}
+  \end{figure}
+}
+\newcommand{\reportappendix}[1]{
+  \clearpage
+  \refstepcounter{chapter}
+  \phantomsection
+  \addcontentsline{toc}{chapter}{ПРИЛОЖЕНИЕ~\thechapter\protect\hspace{0.5em}#1}
+  \begin{center}
+    \textbf{ПРИЛОЖЕНИЕ \thechapter}\\
+    \textbf{#1}
+  \end{center}
+}
+\newcommand{\startreportappendices}{
+  \appendix
+  \renewcommand{\thechapter}{\Asbuk{chapter}}
+  \counterwithin{figure}{chapter}
+  \counterwithin{table}{chapter}
+  \counterwithin{equation}{chapter}
+}

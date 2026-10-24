@@ -48,6 +48,7 @@ nav:
   - Сдача и защита:
       - Порядок сдачи: syllabus/submission.md
       - Репозиторий и отчёты: solutions/README.md
+      - Оформление LaTeX: materials/report-format.md
   - Оценивание:
       - Баллы и шкала: assessment/README.md
       - Экзамен: assessment/exam.md

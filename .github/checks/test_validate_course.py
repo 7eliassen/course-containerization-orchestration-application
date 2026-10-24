@@ -61,6 +61,22 @@ class CourseChecks(unittest.TestCase):
         leak.write_text("must not be published", encoding="utf-8")
         self.assertTrue(any("staging:" in message for message in validate(self.root, staged=True)))
 
+    def test_old_first_lab_policy(self) -> None:
+        self.mutate("labs/01-docker.md", "## Формат сдачи", "## Формат сдачи\n\nРепозиторий не нужен.")
+        self.assertTrue(any("obsolete" in message for message in validate(self.root)))
+
+    def test_missing_first_lab_sources(self) -> None:
+        self.mutate("labs/01-docker.md", "solutions/reports/lab-1/", "local-only/")
+        self.assertTrue(any("lab-1:" in message for message in validate(self.root)))
+
+    def test_missing_latex_source(self) -> None:
+        (self.root / "materials/report-latex/Paper.tex").unlink()
+        self.assertTrue(any("LaTeX template:" in message for message in validate(self.root)))
+
+    def test_extra_template_asset(self) -> None:
+        (self.root / "materials/report-latex/unnecessary.zip").write_bytes(b"test")
+        self.assertTrue(any("LaTeX template:" in message for message in validate(self.root)))
+
 
 if __name__ == "__main__":
     unittest.main()

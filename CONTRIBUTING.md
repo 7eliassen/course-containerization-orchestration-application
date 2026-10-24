@@ -4,4 +4,4 @@
 
 Студенческие решения не нужно присылать в репозиторий преподавателя. Размещайте их в `solutions/` своего форка по [инструкции](solutions/README.md).
 
-Преподавателю: [руководство по запуску курса](.github/teaching/README.md), [правила оформления](.github/teaching/authoring.md), [чек-лист семестра](.github/teaching/semester-checklist.md). Перед отправкой проверьте ссылки, баллы и успешную сборку в Actions.
+Перед отправкой проверьте ссылки, баллы и успешную сборку в Actions. Содержание курса проверяется командой `python3 .github/checks/validate_course.py` после установки зависимостей из `.github/docs/requirements-docs.txt`.
