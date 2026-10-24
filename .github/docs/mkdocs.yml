@@ -1,0 +1,54 @@
+site_name: Контейнеризация и оркестрация приложений
+site_description: Силлабус, лабораторные работы и материалы курса
+docs_dir: ../../.site-src/docs
+site_dir: ../../site
+theme:
+  name: material
+  language: ru
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+plugins:
+  - search:
+      lang:
+        - ru
+        - en
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+nav:
+  - Главная: README.md
+  - Силлабус:
+      - Обзор: syllabus/README.md
+      - Программа и правила: syllabus/course.md
+      - Расписание: syllabus/schedule.md
+  - Лекции: lectures/README.md
+  - Лабораторные:
+      - Обзор: labs/README.md
+      - "ЛР 1. Docker": labs/01-docker.md
+      - "ЛР 2. Образы Docker": labs/02-docker-image.md
+      - "ЛР 3. Персистентность": labs/03-persistence.md
+      - "ЛР 4. Docker Compose": labs/04-compose.md
+      - "ЛР 5. Kubernetes": labs/05-kubernetes.md
+      - "ЛР 6. Kubernetes и CI/CD": labs/06-k8s-cicd.md
+  - Материалы:
+      - Обзор: materials/README.md
+      - Шпаргалка: materials/cheatsheet.md
+      - Каталог данных: materials/data-catalog.md
+  - Оценивание:
+      - Обзор: assessment/README.md
+      - Критерии: assessment/rubric.md
+  - Решения: solutions/README.md
+  - Метаданные: meta/README.md
+  - Участие в курсе: CONTRIBUTING.md

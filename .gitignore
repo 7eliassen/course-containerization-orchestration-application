@@ -13,3 +13,7 @@ venv/
 .DS_Store
 .idea/
 .vscode/
+
+# MkDocs: generated sources and built site
+.site-src/
+site/
