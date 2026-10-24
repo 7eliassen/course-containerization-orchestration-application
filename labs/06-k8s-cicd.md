@@ -1,15 +1,19 @@
 ---
 lab: 6
 title: "Знакомство с Kubernetes (продолжение)"
-min_score: 5
-max_score: 10
+min_score: 7.5
+max_score: 15
 ---
 
 # Лабораторная работа №6
 
 ## Kubernetes на двух машинах и CI/CD: автоматическая сборка образа и выкатка в кластер
 
-**Максимум: 15 баллов.**
+| Минимум | Максимум | Результат |
+|---|---|---|
+| 7,5 | 15 | Ветка `lab-6`, PDF и ссылка на CI |
+
+Работа выполняется с напарником на двух машинах. Проект находится в `solutions/assist-py/`, а учебный workflow в `.github/workflows/ci.yml` от корня вашего форка; порядок сдачи и штраф описаны в [общей инструкции](../syllabus/submission.md).
 
 Продолжаем ЛР №5 с тем же приложением (FastAPI, PostgreSQL, Redis) и теми же манифестами из `k8s/`. Теперь кластер будет из двух узлов, а образ приложения будет собирать и публиковать GitHub Actions.
 
@@ -122,7 +126,9 @@ kubectl get nodes --show-labels
 
 ### Задание 2.1 - Подготовьте репозиторий
 
-Откройте репозиторий с прошлых работ, создайте из `lab-5` ветку `lab-6` и убедитесь, что в корне лежат `Dockerfile` и каталог `k8s/` из ЛР №5. Репозиторий должен быть на GitHub и публичным.
+Откройте свой публичный форк, создайте из `lab-5` ветку `lab-6` и убедитесь, что `Dockerfile` и `k8s/` лежат в `solutions/assist-py/`. Учебный workflow создавайте в `.github/workflows/ci.yml` от корня форка, не в каталоге приложения.
+
+Дальше команды приложения и `kubectl apply -f k8s/` выполняются из `solutions/assist-py/` на машине с доступом к кластеру. В задании 2.3 команды `git add .github/workflows/ci.yml`, `git commit` и `git push` выполняются из корня форка.
 
 ### Задание 2.2 - Создайте workflow `.github/workflows/ci.yml`
 
@@ -143,13 +149,13 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: solutions/assist-py
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - name: Install dependencies
@@ -159,9 +165,9 @@ jobs:
 
   build-and-push:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3

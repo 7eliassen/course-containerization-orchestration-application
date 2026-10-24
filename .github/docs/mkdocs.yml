@@ -1,5 +1,7 @@
 site_name: Контейнеризация и оркестрация приложений
 site_description: Силлабус, лабораторные работы и материалы курса
+site_url: https://itmo-faculty-applied-informatics.github.io/course-containerization-orchestration-application/
+repo_url: https://github.com/itmo-faculty-applied-informatics/course-containerization-orchestration-application
 docs_dir: ../../.site-src/docs
 site_dir: ../../site
 theme:
@@ -27,13 +29,14 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+validation:
+  links:
+    anchors: warn
 nav:
-  - Главная: README.md
-  - Силлабус:
-      - Обзор: syllabus/README.md
+  - Начало:
+      - Главная: README.md
+      - Быстрый старт: syllabus/start.md
       - Программа и правила: syllabus/course.md
-      - Расписание: syllabus/schedule.md
-  - Лекции: lectures/README.md
   - Лабораторные:
       - Обзор: labs/README.md
       - "ЛР 1. Docker": labs/01-docker.md
@@ -42,13 +45,14 @@ nav:
       - "ЛР 4. Docker Compose": labs/04-compose.md
       - "ЛР 5. Kubernetes": labs/05-kubernetes.md
       - "ЛР 6. Kubernetes и CI/CD": labs/06-k8s-cicd.md
-  - Материалы:
-      - Обзор: materials/README.md
-      - Шпаргалка: materials/cheatsheet.md
-      - Каталог данных: materials/data-catalog.md
+  - Сдача и защита:
+      - Порядок сдачи: syllabus/submission.md
+      - Репозиторий и отчёты: solutions/README.md
   - Оценивание:
-      - Обзор: assessment/README.md
-      - Критерии: assessment/rubric.md
-  - Решения: solutions/README.md
-  - Метаданные: meta/README.md
-  - Участие в курсе: CONTRIBUTING.md
+      - Баллы и шкала: assessment/README.md
+      - Экзамен: assessment/exam.md
+      - Общая рубрика: assessment/rubric.md
+  - Материалы:
+      - Лекции: lectures/README.md
+      - Полезные ресурсы: materials/README.md
+  - Помощь: materials/faq.md

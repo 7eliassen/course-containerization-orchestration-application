@@ -1,5 +1,7 @@
 .env
-k8s/app-secret.yaml
+.env.*
+!.env.example
+**/k8s/app-secret.yaml
 __pycache__/
 *.pyc
 venv/
