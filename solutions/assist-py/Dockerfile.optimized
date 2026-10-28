@@ -1,0 +1,23 @@
+FROM python:3.11-slim AS builder
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+FROM python:3.11-slim
+
+LABEL maintainer="lyasin@lab.local"
+LABEL version="1.0"
+EXPOSE 5500
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl
+
+COPY --from=builder /opt/venv /opt/venv
+COPY . .
+
+ENV PATH="/opt/venv/bin:$PATH"
+CMD ["/opt/venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5500"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:5500/health || exit 1

@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:15
+    container_name: lyasin-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - lyasin-pgdata:/var/lib/postgresql/data
+    networks:
+      - lyasin-backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: lyasin-app
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    environment:
+      APP_OWNER: ${APP_OWNER}
+      APP_SECRET: ${APP_SECRET}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      REDIS_PORT: ${REDIS_PORT}
+      CACHE_TTL: ${CACHE_TTL}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - lyasin-backend
+
+  redis:
+    image: redis:7-alpine
+    container_name: lyasin-redis
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      - lyasin-backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  lyasin-pgdata:
+
+networks:
+  lyasin-backend:
+    driver: bridge
