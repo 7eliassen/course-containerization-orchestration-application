@@ -1,0 +1,146 @@
+\reportelement{Введение}
+
+\textbf{Цель работы:} перенести запуск приложения, PostgreSQL и Redis в
+Docker Compose и освоить масштабирование сервисов.
+
+В работе используются следующие инструменты: Docker, Docker Compose,
+PostgreSQL, Redis, а также приложение-ассистент, обращающееся к внешнему
+API погоды. Персональные параметры приведены в
+таблице~\ref{tab:parameters}.
+
+\begin{table}[H]
+  \caption{Персональные параметры}\label{tab:parameters}
+  \centering
+  \begin{tabularx}{\textwidth}{|p{0.46\textwidth}|X|}
+    \hline
+    Параметр & Значение\\ \hline
+    Номер ИСУ & \StudentISU\\ \hline
+    Персональный порт (PostgreSQL, \texttt{PG\_PORT}) & 5500\\ \hline
+    Персональный порт (Redis, \texttt{REDIS\_PORT}) & 6440\\ \hline
+    Персональный порт (приложение, \texttt{APP\_PORT}) & 8070\\ \hline
+    Персональный префикс & \texttt{lyasin}\\ \hline
+    Секретный ключ & \texttt{secret70lyasin}\\ \hline
+    Имя базы данных & \texttt{lyasin70}\\ \hline
+  \end{tabularx}
+\end{table}
+
+Результат хранится в ветке \texttt{lab-\LabNumber} форка репозитория:
+\url{\RepositoryURL}.
+
+\chapter{Ход выполнения}
+
+\section{Этап 1. Подготовка проекта для Docker Compose}
+
+Создадим файл \texttt{.env} с переменными окружения проекта
+(рисунок~\ref{fig:stage1-env}). Создадим файл \texttt{compose.yml} в корне
+проекта: в нём описаны два сервиса~--- база данных и приложение;
+переменные окружения подтягиваются из \texttt{.env}
+(рисунок~\ref{fig:stage1-compose}). Далее поднимем его командой \texttt{docker compose up -d}
+
+\reportscreenshot{image-1.png}{Файл \texttt{.env} с переменными окружения}{fig:stage1-env}
+\reportscreenshot{image-2.png}{Создание файла \texttt{compose.yml}}{fig:stage1-compose}
+
+Проверим логи приложения и базы данных
+(рисунки~\ref{fig:stage1-logs-app} и~\ref{fig:stage1-logs-db}).
+
+\reportscreenshot{image-3.png}{Логи приложения}{fig:stage1-logs-app}
+\reportscreenshot{image-4.png}{Логи базы данных}{fig:stage1-logs-db}
+
+Убедимся, что сервис успешно поднялся (рисунок~\ref{fig:stage1-up}).
+
+\reportscreenshot{image-5.png}{Проверка успешного запуска сервиса}{fig:stage1-up}
+
+\section{Этап 2. Добавление Redis для кэширования погоды}
+
+Добавим Redis в проект, чтобы кэшировать запросы к внешнему API. Пропишем
+новый сервис \texttt{redis} и добавим его в зависимости сервиса
+\texttt{app} (рисунок~\ref{fig:stage2-redis-service}).
+
+\reportscreenshot{image-6.png}{Добавление сервиса Redis и зависимостей}{fig:stage2-redis-service}
+
+Файл \texttt{main.py} устарел, поэтому в него были внесены изменения для
+работы кэширования. Перезапустим Compose и проверим, что все три сервиса
+подняты и имеют статус \texttt{healthy} (кроме \texttt{app}, для него
+healthcheck не прописан), рисунок~\ref{fig:stage2-ps}.
+
+\reportscreenshot{image-7.png}{Статусы сервисов после перезапуска}{fig:stage2-ps}
+
+Проверим порядок запуска сервисов через логи: \texttt{app} запускается
+последним (рисунок~\ref{fig:stage2-order}).
+
+\reportscreenshot{image-8.png}{Порядок запуска сервисов по логам}{fig:stage2-order}
+
+На этом этапе обнаружено, что подключение к Redis не срабатывает. В
+\texttt{compose.yml} добавлена строка, передающая переменную окружения
+\texttt{REDIS\_URL} в \texttt{app} (рисунок~\ref{fig:stage2-redis-url}).
+
+\reportscreenshot{image-9.png}{Передача \texttt{REDIS\_URL} в приложение}{fig:stage2-redis-url}
+
+Выведем лог \texttt{app} и убедимся, что подключение к Redis успешно
+(рисунок~\ref{fig:stage2-redis-ok}).
+
+\reportscreenshot{image-10.png}{Успешное подключение к Redis}{fig:stage2-redis-ok}
+
+Также \texttt{main.py} был отредактирован для использования зеркал, так
+как исходный API оказался недоступен. Выполним два запроса к приложению:
+второй произошёл заметно быстрее, в поле \texttt{source} первого запроса
+указано \texttt{api}, второго~--- \texttt{cache}
+(рисунок~\ref{fig:stage2-cache}).
+
+\reportscreenshot{image-11.png}{Два запроса: источник \texttt{api} и \texttt{cache}}{fig:stage2-cache}
+
+Проверим статистику кэша (рисунок~\ref{fig:stage2-stats}) и Redis
+напрямую~--- убедимся в наличии записи
+(рисунок~\ref{fig:stage2-redis-direct}).
+
+\reportscreenshot{image-12.png}{Статистика кэша}{fig:stage2-stats}
+\reportscreenshot{image-13.png}{Запись в Redis, полученная напрямую}{fig:stage2-redis-direct}
+
+Посмотрим список сетей: созданная сеть имеет приставку
+\texttt{assist-py\_} (рисунок~\ref{fig:stage2-networks}). Информация об
+этой сети показывает, что все три контейнера принадлежат ей
+(рисунок~\ref{fig:stage2-network-info}).
+
+\reportscreenshot{image-14.png}{Список сетей}{fig:stage2-networks}
+\reportscreenshot{image-15.png}{Информация о сети проекта}{fig:stage2-network-info}
+
+Аналогично имя volume также имеет приставку \texttt{assist-py\_}
+(рисунок~\ref{fig:stage2-volume}).
+
+\reportscreenshot{image-16.png}{Именованный volume проекта}{fig:stage2-volume}
+
+\section{Этап 3. Масштабирование сервиса}
+
+Закоммитим текущий \texttt{compose.yml} и обновим его, добавив возможность
+масштабирования (рисунок~\ref{fig:stage3-compose}).
+
+\reportscreenshot{image-17.png}{Обновлённый \texttt{compose.yml} с поддержкой масштабирования}{fig:stage3-compose}
+
+Остановим текущие контейнеры и запустим обновлённый Compose с количеством
+экземпляров \texttt{app = 3}. Каждому из трёх контейнеров приложения
+назначен свой порт из диапазона 32768--32770
+(рисунок~\ref{fig:stage3-scale}).
+
+\reportscreenshot{image-18.png}{Запуск трёх экземпляров приложения}{fig:stage3-scale}
+
+Проверим, что каждый из сервисов доступен по отдельности и что все
+экземпляры разделяют общий кэш (рисунок~\ref{fig:stage3-shared}).
+
+\reportscreenshot{image-19.png}{Доступность экземпляров и общий кэш}{fig:stage3-shared}
+
+После проверки вернём предыдущую конфигурацию без масштабирования.
+
+\section{Этап 4. Финальный артефакт}
+
+Финальный артефакт лабораторной работы приведён на
+рисунке~\ref{fig:final}.
+
+\reportscreenshot{image-20.png}{Финальный артефакт лабораторной работы}{fig:final}
+
+\reportelement{Заключение}
+
+В ходе работы запуск приложения, PostgreSQL и Redis были выполнены в
+Docker Compose. настроены зависимости и порядок запуска. Добавлен
+Redis для кэширования запросов к внешнему API. Проверено совместное
+использование сети и именованного volume сервисами проекта, а также
+выполнено масштабирование приложения до трёх экземпляров с общим кэшем.
