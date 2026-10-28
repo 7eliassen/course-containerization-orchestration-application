@@ -1,0 +1,254 @@
+\documentclass[14pt]{extreport}
+\usepackage{gost}
+\usepackage{emptypage}
+\usepackage{lscape}
+\usepackage{ulem}
+\usepackage{amssymb, amsmath}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{textcomp}
+\usepackage{float}
+
+\setcounter{page}{1}
+\thispagestyle{empty}
+
+\begin{document}
+
+% ===== ТИТУЛЬНЫЙ ЛИСТ =====
+\thispagestyle{empty}
+\begingroup
+\singlespacing
+\setlength{\parskip}{0pt}
+
+\begin{center}
+    {\bfseries Министерство науки и высшего образования Российской Федерации} \\[1pt]
+    ФЕДЕРАЛЬНОЕ ГОСУДАРСТВЕННОЕ АВТОНОМНОЕ ОБРАЗОВАТЕЛЬНОЕ УЧРЕЖДЕНИЕ ВЫСШЕГО ОБРАЗОВАНИЯ \\[1pt]
+    {\bfseries НАЦИОНАЛЬНЫЙ ИССЛЕДОВАТЕЛЬСКИЙ УНИВЕРСИТЕТ ИТМО} \\[1pt]
+    {\bfseries ITMO University} \\[0.8cm]
+    {\bfseries ОТЧЕТ ПО ПРАКТИЧЕСКОЙ РАБОТЕ № 3}
+\end{center}
+
+\vspace{0.5cm}
+
+% ---------- Блок данных (с увеличенным межстрочным интервалом) ----------
+{\setstretch{1.5}
+\begin{flushleft}
+    {\bfseries По дисциплине:} Контейнеризация и оркестрация приложений \par
+    {\bfseries Тема работы:} Персистентность и изоляция \par
+    {\bfseries Обучающийся:} Лясин Илья Игоревич \par
+    {\bfseries Факультет:} 11.03.02 Прикладная информатика \par
+    {\bfseries Группа:} К3321 \par
+    {\bfseries Направление подготовки:} 11.03.02 Инфокоммуникационные технологии и системы связи \par
+    {\bfseries Образовательная программа:} Программирование в инфокоммуникационных системах \par
+\end{flushleft}
+}
+
+\vspace{0.5cm}
+
+% ---------- Блок подписей на всю ширину страницы ----------
+\noindent
+\begin{tabular*}{\textwidth}{@{}p{2.8cm} @{\extracolsep{\fill}} p{3.2cm} p{3.2cm} p{3.2cm}@{}}
+\textbf{Обучающийся} & \makebox[3.2cm]{\hrulefill} & \makebox[3.2cm]{\hrulefill} & \makebox[3.2cm]{\shortstack{Лясин И.И.\\[-2pt]\rule{3.2cm}{0.4pt}}} \\[2pt]
+                     & \makebox[3.2cm]{\scriptsize(дата)} & \makebox[3.2cm]{\scriptsize(подпись)} & \makebox[3.2cm]{\scriptsize(Ф.И.О.)} \\[1.2cm]
+\textbf{Руководитель} & \makebox[3.2cm]{\hrulefill} & \makebox[3.2cm]{\hrulefill} & \makebox[3.2cm]{\shortstack{Аминов Н.С.\\[-2pt]\rule{3.2cm}{0.4pt}}} \\[2pt]
+                      & \makebox[3.2cm]{\scriptsize(дата)} & \makebox[3.2cm]{\scriptsize(подпись)} & \makebox[3.2cm]{\scriptsize(Ф.И.О.)} \\
+\end{tabular*}
+
+\vfill
+
+\begin{center}
+Санкт-Петербург 2026
+\end{center}
+\endgroup
+
+
+% ===== ОГЛАВЛЕНИЕ =====
+\newpage
+\tableofcontents
+\thispagestyle{fancyplain}
+\newpage
+
+% ===== ВВЕДЕНИЕ =====
+\intro\label{intro}
+\textbf{Цель работы:} Подключаем к приложению PostgreSQL, учимся хранить данные вне контейнера и разбираемся с сетями Docker.
+
+В рамках работы рассматриваются основные механизмы контейнеризации: именованные тома для хранения данных, bind mount для передачи конфигурации, а также пользовательские сети для изоляции и связывания контейнеров. Практическая часть выполняется с использованием персональных данных, приведенных в таблице \ref{tab:params}.
+
+\begin{table}[H]
+\caption{Персональные параметры}
+\label{tab:params}
+\begin{tabular}{|l|l|}
+\hline
+Параметр & Значение \\
+\hline
+Номер ИСУ & 466570 \\
+Персональный порт (app) & 5500 \\
+Персональный порт (assistant) & 8070 \\
+Персональный префикс & lyasin \\
+Секретный ключ & secret70lyasin \\
+Имя базы данных & lyasin70 \\
+\hline
+\end{tabular}
+\end{table}
+
+% ===== ГЛАВЫ =====
+\chapter{Основная часть}
+
+\section{Этап 1. Запуск контейнера с именованным volume}
+
+В ранее склонированном репозитории перейдём в ветку \texttt{lab-2} и создадим новую \texttt{lab-3}. Далее создадим новый том.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-1.png}
+    \caption{Создание нового тома}
+    \label{fig:stage1-volume}
+\end{figure}
+
+И запустим postgres с созданным томом (рисунок~\ref{fig:stage1-postgres}). Том будет подключаться как директория \texttt{var/lib/postgresql/data} внутри контейнера. Именно эта директория содержит базы данных в postgres.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-2.png}
+    \caption{Запуск postgres с созданным томом}
+    \label{fig:stage1-postgres}
+\end{figure}
+
+Запустим контейнер с приложением ассистент (рисунок~\ref{fig:stage1-assistant}). Мы передаем переменную \texttt{DATABASE\_URL} как адрес \texttt{host.docker.internal} - DNS имя хоста. Т.е. приложение получает доступ к БД через сеть хоста, также как пользователь подключается к БД через localhost.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-3.png}
+    \caption{Запуск контейнера с приложением ассистент}
+    \label{fig:stage1-assistant}
+\end{figure}
+
+И проверим его работоспособность (рисунок~\ref{fig:stage1-check}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-4.png}
+    \caption{Проверка работоспособности приложения}
+    \label{fig:stage1-check}
+\end{figure}
+
+\section{Этап 2. Тест персистентности: пересоздание контейнера}
+
+Проверим, что приложение сохраняет информацию после перезапуска контейнера (рисунок~\ref{fig:stage2-restart}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-5.png}
+    \caption{Проверка сохранения информации после перезапуска}
+    \label{fig:stage2-restart}
+\end{figure}
+
+Выполним запрос к приложению (рисунок~\ref{fig:stage2-request}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-6.png}
+    \caption{Запрос к приложению}
+    \label{fig:stage2-request}
+\end{figure}
+
+Артефакт персистентности (рисунок~\ref{fig:stage2-artifact}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-7.png}
+    \caption{Артефакт персистентности}
+    \label{fig:stage2-artifact}
+\end{figure}
+
+\section{Этап 3. Bind mount для конфигурации}
+
+Изменим конфигурационный файл \texttt{config/app.conf} (рисунок~\ref{fig:stage3-config}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-8.png}
+    \caption{Изменение конфигурационного файла}
+    \label{fig:stage3-config}
+\end{figure}
+
+Теперь запустим новый контейнер, примонтировав конфигурацию как \texttt{bind mount}. Затем зайдём внутрь контейнера и проверим, что конфигурация действительно доступна изнутри контейнера (рисунок~\ref{fig:stage3-mount}). Конфиг подключен как read-only, т.е. конфигурация производится только извне контейнера.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-9.png}
+    \caption{Проверка доступности конфигурации внутри контейнера}
+    \label{fig:stage3-mount}
+\end{figure}
+
+\section{Этап 4. Пользовательские сети для изоляции}
+
+Создадим пользовательскую сеть и удалим ненужные контейнеры с прошлых этапов (рисунок~\ref{fig:stage4-network}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-10.png}
+    \caption{Создание пользовательской сети и удаление контейнеров}
+    \label{fig:stage4-network}
+\end{figure}
+
+Запустим БД и приложения в новой сети (рисунки~\ref{fig:stage4-db} и~\ref{fig:stage4-app}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-11.png}
+    \caption{Запуск БД в новой сети}
+    \label{fig:stage4-db}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-12.png}
+    \caption{Запуск приложения в новой сети}
+    \label{fig:stage4-app}
+\end{figure}
+
+Благодаря тому, что контейнеры запущены в одной сети, мы можем прописать адрес БД, используя имя контейнера, так как для пользовательских сетей запускается docker DNS, в отличии от default.
+
+Проверим доступность приложения (рисунок~\ref{fig:stage4-check}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-13.png}
+    \caption{Проверка доступности приложения}
+    \label{fig:stage4-check}
+\end{figure}
+
+Докажем на практике, что контейнеры изолированы, если находятся в разных сетях, и доступны по имени, если находятся в одной сети (рисунок~\ref{fig:stage4-isolation}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-14.png}
+    \caption{Демонстрация изоляции и доступности по имени}
+    \label{fig:stage4-isolation}
+\end{figure}
+
+\section{Этап 5. Финальный артефакт}
+
+Выведем финальный артефакт лабораторной работы (рисунок~\ref{fig:stage5-final}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image-15.png}
+    \caption{Финальный артефакт лабораторной работы}
+    \label{fig:stage5-final}
+\end{figure}
+
+На рисунке~\ref{fig:stage5-final} видны:
+\begin{enumerate}
+    \item оба контейнера (\texttt{lyasin-postgres}, \texttt{lyasin-assistant});
+    \item именованный volume (\texttt{lyasin-pgdata});
+    \item пользовательская сеть (\texttt{lyasin-backend}).
+\end{enumerate}
+
+% ===== ЗАКЛЮЧЕНИЕ =====
+\conclusions
+
+В ходе практической работы была изучена экосистема Docker: освоены базовые команды, создание и использование именованных volume, bind mount для конфигурации, а также пользовательские сети для изоляции контейнеров. Продемонстрирована персистентность данных при пересоздании контейнера и работа docker DNS в пользовательской сети.
+
+\end{document}

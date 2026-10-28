@@ -1,0 +1,289 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{gost}[2024/01/01 Стиль по ГОСТ 7.32-2017]
+
+\ProcessOptions
+
+\hoffset 0pt
+\voffset 0pt
+
+% ============================================================
+% Поля по ГОСТ 7.32-2017
+% ============================================================
+\RequirePackage[
+  a4paper, includehead, includefoot, mag=1000,
+  headsep=0mm, headheight=0mm,
+  left=30mm, right=15mm, top=20mm, bottom=20mm
+]{geometry}
+
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T2A]{fontenc}
+\RequirePackage[russian]{babel}
+
+\RequirePackage[unicode, pdftex]{hyperref}
+\RequirePackage{pdfpages}
+\RequirePackage{tocbibind}
+
+\RequirePackage[onehalfspacing]{setspace}
+\RequirePackage{cite}
+\RequirePackage{indentfirst}
+\RequirePackage{enumerate}
+\RequirePackage{longtable}
+\RequirePackage{multirow,makecell,array}
+\RequirePackage{graphicx}
+\graphicspath{{fig/}}
+\RequirePackage{float}
+\RequirePackage{pdflscape}
+\RequirePackage{microtype}
+
+% \renewcommand{\rmdefault}{ftm}
+\renewcommand{\sfdefault}{far}
+
+% ============================================================
+% Абзацный отступ 1,25 см
+% ============================================================
+\setlength{\parindent}{1.25cm}
+
+\sloppy
+\clubpenalty=10000
+\widowpenalty=10000
+\righthyphenmin=2
+
+\RequirePackage{fancyvrb}
+\RequirePackage{amssymb,amsmath,amsfonts,latexsym}
+
+\RequirePackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{theorem}{Теорема}
+\newtheorem{proposition}[theorem]{Предложение}
+\newtheorem{corollary}[theorem]{Следствие}
+\newtheorem{lemma}[theorem]{Лемма}
+\newtheorem{definition}[theorem]{Определение}
+\newtheorem{example}[theorem]{Пример}
+\newtheorem{remark}[theorem]{Замечание}
+
+% ============================================================
+% Подписи рисунков и таблиц
+% ============================================================
+\RequirePackage[tableposition=top]{caption}
+\DeclareCaptionLabelFormat{gostfigure}{Рисунок #2}
+\DeclareCaptionLabelFormat{gosttable}{Таблица #2}
+\DeclareCaptionLabelSeparator{gost}{~---~}
+
+\captionsetup[figure]{
+    labelformat=gostfigure,
+    labelsep=gost,
+    position=bottom,
+    justification=centering,
+    singlelinecheck=off,
+    indent=0pt
+}
+
+% Подпись таблицы: по левому краю, без красной строки
+\captionsetup[table]{
+    labelformat=gosttable,
+    labelsep=gost,
+    position=top,
+    justification=raggedright,
+    singlelinecheck=off,
+    indent=0pt,
+    parskip=0pt
+}
+
+% ============================================================
+% Колонтитулы: номер страницы внизу по центру
+% ============================================================
+\RequirePackage{fancyhdr}
+\pagestyle{fancyplain}
+\renewcommand{\headrulewidth}{0pt}
+\fancyhf{}
+\cfoot{\fancyplain{}{\thepage}}
+
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \cfoot{\thepage}
+}
+
+\addtocontents{toc}{\protect\thispagestyle{fancyplain}}
+
+\setcounter{page}{1}
+
+% ============================================================
+% Заголовки разделов
+% ============================================================
+\RequirePackage{titlesec}
+
+\titleformat{\chapter}[block]
+    {\normalsize\bfseries}
+    {\hspace*{\parindent}\thechapter}
+    {1em}{}
+
+\titleformat{\section}[block]
+    {\normalsize\bfseries}
+    {\hspace*{\parindent}\thesection}
+    {1em}{\lsstyle}
+
+\titleformat{\subsection}[block]
+    {\normalsize\bfseries}
+    {\hspace*{\parindent}\thesubsection}
+    {1em}{\lsstyle}
+
+\titleformat{\paragraph}[block]
+    {\normalsize\bfseries}
+    {\hspace*{\parindent}\thesection}
+    {1em}{}
+
+\titlespacing{\chapter}{\parindent}{-30pt}{8pt}
+\titlespacing{\section}{\parindent}{*4}{*4}
+\titlespacing{\subsection}{\parindent}{*4}{*4}
+\titlespacing{\paragraph}{\parindent}{*4}{*4}
+
+\microtypesetup{letterspace=300}
+
+\addto\captionsrussian{%
+  \renewcommand\contentsname{СОДЕРЖАНИЕ}
+  \renewcommand\appendixname{ПРИЛОЖЕНИЕ}
+  \renewcommand\bibname{\hfil{}СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ\hfil{}}
+}
+
+% ============================================================
+% Списки
+% Маркер первого уровня начинается на уровне основного текста.
+% Текст пункта располагается после маркера.
+% ============================================================
+\RequirePackage{enumitem}
+
+\makeatletter
+\AddEnumerateCounter{\asbuk}{\@asbuk}{м)}
+\makeatother
+
+% --- itemize: первый уровень ---
+\setlist[itemize,1]{
+    nosep,
+    leftmargin=\dimexpr\parindent+1.5em\relax,
+    labelindent=0pt,
+    labelsep=0.5em,
+    labelwidth=1em,
+    itemindent=0pt,
+    listparindent=0pt,
+    topsep=0pt,
+    parsep=0pt,
+    partopsep=0pt
+}
+
+% --- itemize: второй уровень ---
+\setlist[itemize,2]{
+    nosep,
+    leftmargin=\dimexpr\parindent+0.5cm+1.5em\relax,
+    labelindent=0pt,
+    labelsep=0.5em,
+    labelwidth=1em,
+    itemindent=0pt,
+    listparindent=0pt,
+    topsep=0pt,
+    parsep=0pt,
+    partopsep=0pt
+}
+
+% --- enumerate: первый уровень ---
+\setlist[enumerate,1]{
+    nosep,
+    leftmargin=\dimexpr\parindent+2em\relax,
+    labelindent=0pt,
+    labelsep=0.5em,
+    labelwidth=1.5em,
+    itemindent=0pt,
+    listparindent=0pt,
+    topsep=0pt,
+    parsep=0pt,
+    partopsep=0pt
+}
+
+% --- enumerate: второй уровень ---
+\setlist[enumerate,2]{
+    nosep,
+    leftmargin=\dimexpr\parindent+0.5cm+2em\relax,
+    labelindent=0pt,
+    labelsep=0.5em,
+    labelwidth=1.5em,
+    itemindent=0pt,
+    listparindent=0pt,
+    topsep=0pt,
+    parsep=0pt,
+    partopsep=0pt
+}
+
+\renewcommand{\labelitemi}{---}
+\renewcommand{\labelitemii}{---}
+
+% ============================================================
+% Оглавление
+% ============================================================
+\RequirePackage{tocloft}
+
+\renewcommand{\cfttoctitlefont}{\hfill\bfseries\MakeUppercase}
+\renewcommand{\cftaftertoctitle}{\hfill\mbox{}\\ \mbox{}\hfill{\footnotesize Стр.}\vspace{-2.5em}}
+\renewcommand{\cftbeforetoctitleskip}{-1em}
+
+\renewcommand{\cftchapfont}{\normalsize\bfseries}
+\renewcommand{\cftsecfont}{\normalsize}
+\renewcommand{\cftsubsecfont}{\normalsize}
+
+\renewcommand{\cftchapindent}{0pt}
+\renewcommand{\cftsecindent}{0.5cm}
+\renewcommand{\cftsubsecindent}{1.0cm}
+
+\renewcommand{\cftbeforechapskip}{1em}
+\renewcommand{\cftparskip}{-1mm}
+\renewcommand{\cftdotsep}{1}
+\renewcommand{\cftchapdotsep}{\cftdotsep}
+\setcounter{tocdepth}{2}
+
+% ============================================================
+% Структурные элементы
+% ============================================================
+\newcommand{\likechapterheading}[1]{
+    \clearpage
+    \begin{center}
+    \textbf{\MakeUppercase{#1}}
+    \end{center}
+}
+
+\newcommand{\abbreviations}{\likechapterheading{ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ}\addcontentsline{toc}{chapter}{ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ}}
+\newcommand{\definitions}{\likechapterheading{ОПРЕДЕЛЕНИЯ}\addcontentsline{toc}{chapter}{ОПРЕДЕЛЕНИЯ}}
+\newcommand{\abbrevdef}{\likechapterheading{ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ}\addcontentsline{toc}{chapter}{ОПРЕДЕЛЕНИЯ, ОБОЗНАЧЕНИЯ И СОКРАЩЕНИЯ}}
+\newcommand{\intro}{\likechapterheading{ВВЕДЕНИЕ}\addcontentsline{toc}{chapter}{ВВЕДЕНИЕ}}
+\newcommand{\conclusions}{\likechapterheading{ЗАКЛЮЧЕНИЕ}\addcontentsline{toc}{chapter}{ЗАКЛЮЧЕНИЕ}}
+\newcommand{\referat}{\likechapterheading{РЕФЕРАТ}\addcontentsline{toc}{chapter}{РЕФЕРАТ}}
+
+% ============================================================
+% Библиография
+% ============================================================
+\makeatletter
+\renewcommand{\@biblabel}[1]{#1.}
+\makeatother
+
+% ============================================================
+% Приложения
+% ============================================================
+\makeatletter
+\newcommand\appendix@chapter[1]{%
+  \renewcommand{\@makeschapterhead}[1]{\@makechapterhead{##1}}%
+  \renewcommand{\thechapter}{\Asbuk{chapter}}%
+  \refstepcounter{chapter}%
+  \orig@chapter*{\appendixname~\thechapter~#1}%
+  \addcontentsline{toc}{chapter}{\appendixname~\thechapter~~#1}%
+}
+\let\orig@chapter\chapter
+\g@addto@macro\appendix{\let\chapter\appendix@chapter}
+\makeatother
+
+\newcommand{\Appendix}{
+\appendix
+\singlespacing
+\renewcommand\thechapter{\Asbuk{chapter}}
+\titleformat{\chapter}[display]
+    {\filcenter}
+    {\centering\MakeUppercase{\appendixname} \thechapter}
+    {8pt}
+    {\bfseries}{}
+}
